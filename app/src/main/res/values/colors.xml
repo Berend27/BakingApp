@@ -3,4 +3,10 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="icing">#FFFFE7</color>
+    <color name="brownie">#5D4037</color>
+    <color name="yellow">#FFF176</color>
+    <color name="pie">#FFE082</color>
+    <color name="cheeseCake">#FFFDE7</color>
+    <color name="crust">#795548</color>
 </resources>

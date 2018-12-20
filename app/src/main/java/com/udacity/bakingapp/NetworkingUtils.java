@@ -45,23 +45,45 @@ public class NetworkingUtils {
         } catch (NullPointerException ne) {Log.e(TAG, ne.toString()); return null;}
     }
 
-    /*
-    public static String[] getPoster(String json)
+    public static String[] getSteps(String json, int placeNumber)
     {
+
         try {
-            JSONObject queryResults = new JSONObject(json);
-            JSONArray movies = queryResults.getJSONArray("results");
-            String[] posters = new String[movies.length()];
-            for (int i = 0; i < movies.length(); i++) {
-                JSONObject movie = movies.getJSONObject(i);
-                posters[i] = "http://image.tmdb.org/t/p/w185/" + movie.getString("poster_path");
+            JSONArray recipes = new JSONArray(json);
+            JSONObject thisRecipe = recipes.getJSONObject(placeNumber);
+            JSONArray recipeSteps = thisRecipe.getJSONArray("steps");
+            String[] steps = new String[recipeSteps.length()];
+            for (int i = 0; i < recipeSteps.length(); i++)
+            {
+                JSONObject thisStep = recipeSteps.getJSONObject(i);
+                steps[i] = thisStep.getString("shortDescription");
             }
-            return posters;
+            return steps;
         } catch (JSONException je) {
             Log.e(TAG, je.toString());
             return null;
         } catch (NullPointerException ne) {Log.e(TAG, ne.toString()); return null;}
-
     }
-     */
+
+    public static String[] getIngredients(String json, int place)
+    {
+        try {
+            JSONArray recipes = new JSONArray(json);
+            JSONObject thisRecipe = recipes.getJSONObject(place);
+            JSONArray ingredientsJson = thisRecipe.getJSONArray("ingredients");
+            String[] ingredients = new String[ingredientsJson.length()];
+            for (int i = 0; i < ingredients.length; i++)
+            {
+                JSONObject thisIngredient = ingredientsJson.getJSONObject(i);
+                String quantity = Double.toString(thisIngredient.getDouble("quantity"));
+                String measure = thisIngredient.getString("measure");
+                String ingredient = thisIngredient.getString("ingredient");
+                ingredients[i] = quantity + " " + measure + " " + ingredient;
+            }
+            return ingredients;
+        } catch (Exception e) {
+            Log.e(TAG, e.toString());
+            return null;
+        }
+    }
 }

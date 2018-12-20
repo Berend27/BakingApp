@@ -65,6 +65,9 @@ public class RecipeCardAdapter extends RecyclerView.Adapter<RecipeCardAdapter.Ca
         recipes = NetworkingUtils.getRecipeNames(json);
     }
 
+    public String getRecipeAt(int index) {
+        return recipes[index];
+    }
 
     class CardViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {

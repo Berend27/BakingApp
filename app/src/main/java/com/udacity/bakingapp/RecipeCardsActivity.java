@@ -1,5 +1,6 @@
 package com.udacity.bakingapp;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -7,6 +8,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.Toast;
+
+import java.util.Arrays;
 
 public class RecipeCardsActivity extends AppCompatActivity
     implements RecipeCardAdapter.RecipeCardClickListener {
@@ -17,6 +20,8 @@ public class RecipeCardsActivity extends AppCompatActivity
     private int numberOfRecipes = 4;
 
     static final String QUERY = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
+
+    private String jsonFromQuery = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +43,22 @@ public class RecipeCardsActivity extends AppCompatActivity
     public void onListItemClicked(int clickedItemIndex) {
         Toast.makeText(this, String.valueOf(clickedItemIndex), Toast.LENGTH_SHORT).show();
         Log.i("Item number selected:", String.valueOf(clickedItemIndex));
+        String[] justTheSteps = NetworkingUtils.getSteps(jsonFromQuery, clickedItemIndex);
+        if (justTheSteps.length > 0) {
+            String[] steps = new String[justTheSteps.length + 1];
+            steps[0] = getString(R.string.Ingredients);
+            for (int i = 1; i < steps.length; i++) {
+                steps[i] = justTheSteps[i - 1];
+            }
+            Intent selectedRecipeIntent = new Intent(this, StepListActivity.class);
+            Bundle stepsBundle = new Bundle();
+            stepsBundle.putStringArray(StepListActivity.STEPS_KEY, steps);
+            stepsBundle.putString(StepListActivity.TITLE, recipesAdapter.getRecipeAt(clickedItemIndex));
+            stepsBundle.putString(StepListActivity.JSON, jsonFromQuery);
+            stepsBundle.putInt(StepListActivity.INDEX, clickedItemIndex);
+            selectedRecipeIntent.putExtras(stepsBundle);
+            startActivity(selectedRecipeIntent);
+        }
     }
 
     public class FetchRecipes extends AsyncTask<String, Void, String> {
@@ -60,6 +81,7 @@ public class RecipeCardsActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(String jsonString) {
             if (jsonString != null) {
+                jsonFromQuery = jsonString;
                 recipesAdapter.setJson(jsonString);
                 recipesAdapter.setRecipes();
                 recipeCards.setAdapter(recipesAdapter);
