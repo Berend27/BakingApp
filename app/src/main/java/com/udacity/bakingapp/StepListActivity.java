@@ -86,11 +86,14 @@ public class StepListActivity extends AppCompatActivity {
                 Intent detailedIntent;
                 if (position == 0)    // if "Ingredients" is selected
                     detailedIntent = new Intent(context, IngredientsActivity.class);
-                else
+                else {
                     detailedIntent = new Intent(context, StepDetails.class);
+                    position = position - 1;    // since "Ingredients" takes up position 0
+                }
                 Bundle selected = new Bundle();
                 selected.putString(JSON, json);
                 selected.putInt(INDEX, index);
+                selected.putInt(StepDetails.STEP, position);
                 detailedIntent.putExtras(selected);
                 startActivity(detailedIntent);
             }

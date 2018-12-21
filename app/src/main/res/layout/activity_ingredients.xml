@@ -12,11 +12,25 @@
         android:text="@string/Ingredients"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center" />
+        android:gravity="center"
+        android:textSize="20sp"
+        android:textColor="@color/darkBlueInk"/>
 
     <ListView
         android:id="@+id/ingredients_ListView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <Button
+        android:id="@+id/view_intro"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:gravity="center"
+        android:text="@string/ViewTheRecipeIntroduction"
+        android:textColor="@color/white"
+        android:background="@color/nextStep"
+        android:onClick="launchIntro"/>
 
 </LinearLayout>

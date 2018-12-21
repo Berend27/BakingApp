@@ -9,4 +9,8 @@
     <color name="pie">#FFE082</color>
     <color name="cheeseCake">#FFFDE7</color>
     <color name="crust">#795548</color>
+    <color name="nextStep">#00A853</color>
+    <color name="previousStep">#C50000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="darkBlueInk">#0D47A1</color>
 </resources>
