@@ -1,18 +1,40 @@
 package com.udacity.bakingapp;
 
 import android.content.Intent;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.TrackGroupArray;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
-// TODO stopping point 12/20  The buttons work, still need an ExoPlayer
-public class StepDetails extends AppCompatActivity {
+
+public class StepDetails extends AppCompatActivity
+    implements ExoPlayer.EventListener {
 
     @BindView(R.id.step_title) TextView stepTitle;
     @BindView(R.id.detailedStep) TextView stepDescription;
@@ -23,12 +45,21 @@ public class StepDetails extends AppCompatActivity {
     public static final String JSON = "json";
     public static final String INDEX = "index";
     public static final String STEP = "step";
+    public static final String PLAYBACK = "playback";
+    public static final String WINDOW = "window";
+    private static final String TAG = StepDetails.class.getSimpleName();
 
     private String[][] specificSteps;
 
     private String json;
     private int recipeNumber;
     private int step;
+    private int currentWindow;
+
+    private long playbackPosition;
+
+    private SimpleExoPlayer player;
+    private SimpleExoPlayerView playerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -44,7 +75,13 @@ public class StepDetails extends AppCompatActivity {
         Intent start = getIntent();
         json = start.getExtras().getString(JSON);
         recipeNumber = start.getExtras().getInt(INDEX);
-        step = start.getExtras().getInt(STEP);
+        if (savedInstanceState != null) {
+            step = savedInstanceState.getInt(STEP);
+            playbackPosition = savedInstanceState.getLong(PLAYBACK, 0);
+            currentWindow = savedInstanceState.getInt(WINDOW, 0);
+        } else {
+            step = start.getExtras().getInt(STEP);
+        }
 
         if (step == NetworkingUtils.getNumberOfSteps(json, recipeNumber) - 1)
             nextButton.setVisibility(View.INVISIBLE);
@@ -62,6 +99,11 @@ public class StepDetails extends AppCompatActivity {
         specificSteps = NetworkingUtils.getSpecificSteps(json, recipeNumber);
         stepTitle.setText(specificSteps[1][step]);
         stepDescription.setText(specificSteps[2][step]);
+
+        playerView = (SimpleExoPlayerView) findViewById(R.id.video_player);
+        playerView.setDefaultArtwork(BitmapFactory.decodeResource(getResources(), R.drawable.exo_controls_play));
+
+        initializePlayer(specificSteps[3][step]);
     }
 
     public void previousStep(View view) {
@@ -73,6 +115,11 @@ public class StepDetails extends AppCompatActivity {
                 previous.setText(R.string.Ingredients);
             else if (step == 1)
                 previous.setText(R.string.Introduction);
+
+            releasePlayer();
+            playbackPosition = 0;
+            currentWindow = 0;
+            initializePlayer(specificSteps[3][step]);
         }
         else {
             Intent intent = new Intent(this, IngredientsActivity.class);
@@ -98,11 +145,112 @@ public class StepDetails extends AppCompatActivity {
             }
             stepTitle.setText(specificSteps[1][step]);
             stepDescription.setText(specificSteps[2][step]);
+
+            releasePlayer();
+            playbackPosition = 0;
+            currentWindow = 0;
+            initializePlayer(specificSteps[3][step]);
         }
 
         if (step > 1)
             previous.setText(R.string.previous_step);
         else if (step == 1)
             previous.setText(R.string.Introduction);
+    }
+
+    private void initializePlayer(String mediaUriString)
+    {
+        Uri mediaUri;
+        try {
+            mediaUri = Uri.parse(mediaUriString);
+        } catch (Exception e) {
+            Log.i(StepDetails.class.getSimpleName(), "There's a problem with the Uri");
+            mediaUri = null;
+        }
+
+        if (player == null)
+        {
+            // Create the instance of the SimpleExoPlayer
+            TrackSelector trackSelector = new DefaultTrackSelector();
+            LoadControl loadControl = new DefaultLoadControl();
+            player = ExoPlayerFactory.newSimpleInstance(this, trackSelector, loadControl);
+            playerView.setPlayer(player);
+
+            // set the listener to this activity
+            player.addListener(this);    // implemented ExoPlayer.EventListener first
+
+            // resume playback position
+            player.seekTo(currentWindow, playbackPosition);
+
+            // Prepare the MediaSource
+            String userAgent = Util.getUserAgent(this, "BakingApp");
+            MediaSource mediaSource = new ExtractorMediaSource(mediaUri,
+                    new DefaultDataSourceFactory(this, userAgent),
+                    new DefaultExtractorsFactory(), null, null);
+            player.prepare(mediaSource);
+            player.setPlayWhenReady(true);
+        }
+    }
+
+    @Override
+    protected void onDestroy(){
+        releasePlayer();
+        super.onDestroy();
+    }
+
+    private void releasePlayer()
+    {
+        if (player != null) {
+            player.stop();
+            player.release();
+            player = null;
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState)
+    {
+        playbackPosition = player.getCurrentPosition();
+        currentWindow = player.getCurrentWindowIndex();
+        savedInstanceState.putInt(STEP, step);
+        savedInstanceState.putLong(PLAYBACK, playbackPosition);
+        savedInstanceState.putInt(WINDOW, currentWindow);
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    @Override
+    public void onTimelineChanged(Timeline timeline, Object manifest) {
+
+    }
+
+    @Override
+    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+
+    }
+
+    @Override
+    public void onLoadingChanged(boolean isLoading) {
+
+    }
+    // TODO stopping point 12/24  This method works, research playbackStates and then the next objective
+    // Merry Christmas!
+    @Override
+    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+        if (playbackState == ExoPlayer.STATE_READY && playWhenReady) {
+            Log.i(TAG, "playing");
+        }
+        else if (playbackState == ExoPlayer.STATE_READY) {
+            Log.i(TAG, "paused");
+        }
+    }
+
+    @Override
+    public void onPlayerError(ExoPlaybackException error) {
+
+    }
+
+    @Override
+    public void onPositionDiscontinuity() {
+
     }
 }

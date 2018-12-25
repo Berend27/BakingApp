@@ -1,5 +1,6 @@
 package com.udacity.bakingapp;
 
+import android.net.Uri;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -7,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.URI;
 import java.text.DecimalFormat;
 
 import okhttp3.OkHttpClient;
@@ -128,4 +130,5 @@ public class NetworkingUtils {
             return 0;
         }
     }
+
 }

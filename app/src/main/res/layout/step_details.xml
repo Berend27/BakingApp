@@ -20,6 +20,12 @@
         android:textSize="20sp"
         android:textColor="@color/darkBlueInk"/>
 
+    <com.google.android.exoplayer2.ui.SimpleExoPlayerView
+        android:id="@+id/video_player"
+        android:layout_width="320dp"
+        android:layout_height="180dp"
+        android:layout_gravity="center_horizontal" />
+
     <TextView
         android:id="@+id/detailedStep"
         android:layout_width="match_parent"
