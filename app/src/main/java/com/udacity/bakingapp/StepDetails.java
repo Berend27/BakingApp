@@ -83,6 +83,10 @@ public class StepDetails extends AppCompatActivity
             step = start.getExtras().getInt(STEP);
         }
 
+        specificSteps = NetworkingUtils.getSpecificSteps(json, recipeNumber);
+        stepTitle.setText(specificSteps[1][step]);
+        stepDescription.setText(specificSteps[2][step]);
+
         if (step == NetworkingUtils.getNumberOfSteps(json, recipeNumber) - 1)
             nextButton.setVisibility(View.INVISIBLE);
         else
@@ -90,15 +94,12 @@ public class StepDetails extends AppCompatActivity
         if (step == 0)
         {
             previous.setText(R.string.Ingredients);
+            stepDescription.setText("");
         }
         else if (step == 1)
             previous.setText(R.string.Introduction);
         else
             previous.setText(R.string.previous_step);
-
-        specificSteps = NetworkingUtils.getSpecificSteps(json, recipeNumber);
-        stepTitle.setText(specificSteps[1][step]);
-        stepDescription.setText(specificSteps[2][step]);
 
         playerView = (SimpleExoPlayerView) findViewById(R.id.video_player);
         playerView.setDefaultArtwork(BitmapFactory.decodeResource(getResources(), R.drawable.exo_controls_play));
@@ -160,6 +161,11 @@ public class StepDetails extends AppCompatActivity
 
     private void initializePlayer(String mediaUriString)
     {
+        if (mediaUriString.equals("")) {
+            playerView.setVisibility(View.INVISIBLE);
+        } else
+            playerView.setVisibility(View.VISIBLE);
+
         Uri mediaUri;
         try {
             mediaUri = Uri.parse(mediaUriString);

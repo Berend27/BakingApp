@@ -5,4 +5,6 @@
     <string name="next_step">Next Step</string>
     <string name="previous_step">Previous Step</string>
     <string name="Introduction">Introduction</string>
+    <string name="app_title">Dexter\'s Baking App</string>
+    <string name="recipes">Recipes</string>
 </resources>
