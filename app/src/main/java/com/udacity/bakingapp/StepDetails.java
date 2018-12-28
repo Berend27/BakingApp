@@ -1,14 +1,18 @@
 package com.udacity.bakingapp;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -33,14 +37,13 @@ import com.google.android.exoplayer2.util.Util;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class StepDetails extends AppCompatActivity
+public class StepDetails extends Fragment
     implements ExoPlayer.EventListener {
 
-    @BindView(R.id.step_title) TextView stepTitle;
-    @BindView(R.id.detailedStep) TextView stepDescription;
-    @BindView(R.id.step_details_toolbar) Toolbar toolbar;
-    @BindView(R.id.next_step) Button nextButton;
-    @BindView(R.id.previous_step) Button previous;
+    TextView stepTitle;
+    TextView stepDescription;
+    Button nextButton;
+    Button previous;
 
     public static final String JSON = "json";
     public static final String INDEX = "index";
@@ -61,50 +64,49 @@ public class StepDetails extends AppCompatActivity
     private SimpleExoPlayer player;
     private SimpleExoPlayerView playerView;
 
+    protected Context context;
+
+    public StepDetails()
+    {
+        // empty constructor so far
+    }
+
     @Override
-    protected void onCreate(Bundle savedInstanceState)
+    public View onCreateView(LayoutInflater layoutInflater, ViewGroup container, Bundle savedInstanceState)
+    {
+        if (savedInstanceState != null) {
+            // get something, maybe image ID's
+        }
+
+        View rootView = layoutInflater.inflate(R.layout.step_details, container, false);
+
+        return rootView;
+
+
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.step_details);
-        ButterKnife.bind(this);
+        context = getActivity().getApplicationContext();
+    }
 
-        setSupportActionBar(toolbar);
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-
-        Intent start = getIntent();
-        json = start.getExtras().getString(JSON);
-        recipeNumber = start.getExtras().getInt(INDEX);
-        if (savedInstanceState != null) {
-            step = savedInstanceState.getInt(STEP);
-            playbackPosition = savedInstanceState.getLong(PLAYBACK, 0);
-            currentWindow = savedInstanceState.getInt(WINDOW, 0);
-        } else {
-            step = start.getExtras().getInt(STEP);
+    @Override
+    public void onStart()
+    {
+        super.onStart();
+        View rootView = getView();
+        if (rootView != null) {
+            stepTitle = (TextView) rootView.findViewById(R.id.step_title);
+            stepDescription = (TextView) rootView.findViewById(R.id.detailedStep);
+            nextButton = (Button) rootView.findViewById(R.id.next_step);
+            previous = (Button) rootView.findViewById(R.id.previous_step);
+            playerView = (SimpleExoPlayerView) rootView.findViewById(R.id.video_player);
+            playerView.setDefaultArtwork(BitmapFactory.decodeResource(getResources(), R.drawable.exo_controls_play));
+            getStepDetails();
         }
 
-        specificSteps = NetworkingUtils.getSpecificSteps(json, recipeNumber);
-        stepTitle.setText(specificSteps[1][step]);
-        stepDescription.setText(specificSteps[2][step]);
-
-        if (step == NetworkingUtils.getNumberOfSteps(json, recipeNumber) - 1)
-            nextButton.setVisibility(View.INVISIBLE);
-        else
-            nextButton.setVisibility(View.VISIBLE);
-        if (step == 0)
-        {
-            previous.setText(R.string.Ingredients);
-            stepDescription.setText("");
-        }
-        else if (step == 1)
-            previous.setText(R.string.Introduction);
-        else
-            previous.setText(R.string.previous_step);
-
-        playerView = (SimpleExoPlayerView) findViewById(R.id.video_player);
-        playerView.setDefaultArtwork(BitmapFactory.decodeResource(getResources(), R.drawable.exo_controls_play));
-
-        initializePlayer(specificSteps[3][step]);
     }
 
     public void previousStep(View view) {
@@ -123,7 +125,7 @@ public class StepDetails extends AppCompatActivity
             initializePlayer(specificSteps[3][step]);
         }
         else {
-            Intent intent = new Intent(this, IngredientsActivity.class);
+            Intent intent = new Intent(context, IngredientsActivity.class);
             Bundle selected = new Bundle();
             selected.putString(JSON, json);
             selected.putInt(INDEX, recipeNumber);
@@ -179,7 +181,7 @@ public class StepDetails extends AppCompatActivity
             // Create the instance of the SimpleExoPlayer
             TrackSelector trackSelector = new DefaultTrackSelector();
             LoadControl loadControl = new DefaultLoadControl();
-            player = ExoPlayerFactory.newSimpleInstance(this, trackSelector, loadControl);
+            player = ExoPlayerFactory.newSimpleInstance(context, trackSelector, loadControl);
             playerView.setPlayer(player);
 
             // set the listener to this activity
@@ -189,9 +191,9 @@ public class StepDetails extends AppCompatActivity
             player.seekTo(currentWindow, playbackPosition);
 
             // Prepare the MediaSource
-            String userAgent = Util.getUserAgent(this, "BakingApp");
+            String userAgent = Util.getUserAgent(context, "BakingApp");
             MediaSource mediaSource = new ExtractorMediaSource(mediaUri,
-                    new DefaultDataSourceFactory(this, userAgent),
+                    new DefaultDataSourceFactory(context, userAgent),
                     new DefaultExtractorsFactory(), null, null);
             player.prepare(mediaSource);
             player.setPlayWhenReady(true);
@@ -199,7 +201,7 @@ public class StepDetails extends AppCompatActivity
     }
 
     @Override
-    protected void onDestroy(){
+    public void onDestroy(){
         releasePlayer();
         super.onDestroy();
     }
@@ -258,5 +260,38 @@ public class StepDetails extends AppCompatActivity
     @Override
     public void onPositionDiscontinuity() {
 
+    }
+
+    // setter methods to set the values in the fragment
+    public void setSpecificSteps(String json, int recipeNumber)
+    {
+        specificSteps = NetworkingUtils.getSpecificSteps(json, recipeNumber);
+    }
+
+    public void setStep(int currentStep)
+    {
+        step = currentStep;
+    }
+
+    public void getStepDetails()
+    {
+        stepTitle.setText(specificSteps[1][step]);
+        stepDescription.setText(specificSteps[2][step]);
+
+        if (step == NetworkingUtils.getNumberOfSteps(json, recipeNumber) - 1)
+            nextButton.setVisibility(View.INVISIBLE);
+        else
+            nextButton.setVisibility(View.VISIBLE);
+        if (step == 0)
+        {
+            previous.setText(R.string.Ingredients);
+            stepDescription.setText("");
+        }
+        else if (step == 1)
+            previous.setText(R.string.Introduction);
+        else
+            previous.setText(R.string.previous_step);
+
+        initializePlayer(specificSteps[3][step]);
     }
 }

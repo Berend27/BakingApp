@@ -87,7 +87,7 @@ public class StepListActivity extends AppCompatActivity {
                 if (position == 0)    // if "Ingredients" is selected
                     detailedIntent = new Intent(context, IngredientsActivity.class);
                 else {
-                    detailedIntent = new Intent(context, StepDetails.class);
+                    detailedIntent = new Intent(context, DetailsActivity.class);
                     position = position - 1;    // since "Ingredients" takes up position 0
                 }
                 Bundle selected = new Bundle();

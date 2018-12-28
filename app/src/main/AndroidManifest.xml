@@ -23,7 +23,7 @@
             android:launchMode="singleTop"
             android:parentActivityName=".RecipeCardsActivity"></activity>
         <activity
-            android:name=".StepDetails"
+            android:name=".DetailsActivity"
             android:parentActivityName=".StepListActivity" />
         <activity android:name=".IngredientsActivity"></activity>
     </application>
