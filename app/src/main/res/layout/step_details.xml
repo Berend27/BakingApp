@@ -39,8 +39,7 @@
             android:gravity="center"
             android:text="@string/previous_step"
             android:textColor="@color/white"
-            android:background="@color/previousStep"
-            android:onClick="previousStep" />
+            android:background="@color/previousStep" />
 
         <Button
             android:id="@+id/next_step"
@@ -51,8 +50,7 @@
             android:gravity="center"
             android:text="@string/next_step"
             android:textColor="@color/white"
-            android:background="@color/nextStep"
-            android:onClick="nextStep" />
+            android:background="@color/nextStep" />
 
     </LinearLayout>
 

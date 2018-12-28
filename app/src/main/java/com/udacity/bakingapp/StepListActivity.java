@@ -57,48 +57,13 @@ public class StepListActivity extends AppCompatActivity {
             }
         }
 
-        TextView titleTextView = (TextView) findViewById(R.id.recipe_name);
-        if (title.contains("Pie"))
-            titleTextView.setBackgroundColor(getResources().getColor(R.color.pie));
-        if (title.contains("Brownies")) {
-            titleTextView.setTextColor(getResources().getColor(R.color.icing));
-            titleTextView.setBackgroundColor(getResources().getColor(R.color.brownie));
-        } else if (title.contains("Yellow"))
-            titleTextView.setBackgroundColor(getResources().getColor(R.color.yellow));
-        else if (title.contains("Cheesecake")) {
-            titleTextView.setBackgroundColor(getResources().getColor(R.color.cheeseCake));
-            titleTextView.setTextColor(getResources().getColor(R.color.crust));
-        } else if (title.contains("Nutella")) {
-            titleTextView.setTextColor(getResources().getColor(R.color.brownie));
+        if (savedInstanceState == null)
+        {
+            StepListFragment listFragment = (StepListFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.step_list);
+            // call setter methods for json, index number, and title
+            listFragment.setUpListFragment(json, index, title, steps);
         }
-        titleTextView.setText(title);
-
-
-        ArrayAdapter<String> listAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,
-                steps);
-        ListView stepList = (ListView) findViewById(R.id.steps_list);
-        stepList.setAdapter(listAdapter);
-
-        // Creating the Click Listener
-        AdapterView.OnItemClickListener clickListener = new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View itemView, int position, long id) {
-                Intent detailedIntent;
-                if (position == 0)    // if "Ingredients" is selected
-                    detailedIntent = new Intent(context, IngredientsActivity.class);
-                else {
-                    detailedIntent = new Intent(context, DetailsActivity.class);
-                    position = position - 1;    // since "Ingredients" takes up position 0
-                }
-                Bundle selected = new Bundle();
-                selected.putString(JSON, json);
-                selected.putInt(INDEX, index);
-                selected.putInt(StepDetails.STEP, position);
-                detailedIntent.putExtras(selected);
-                startActivity(detailedIntent);
-            }
-        };
-        stepList.setOnItemClickListener(clickListener);
 
     }
 

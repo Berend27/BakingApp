@@ -54,11 +54,12 @@ public class DetailsActivity extends AppCompatActivity {
             currentWindow = savedInstanceState.getInt(WINDOW, 0);
         } else {
             step = start.getExtras().getInt(STEP);
+            // Initialize the Fragment
+            StepDetails detailsFragment = (StepDetails) getSupportFragmentManager().findFragmentById(R.id.details_fragment);
+            detailsFragment.setStep(step);
+            detailsFragment.setSpecificSteps(json, recipeNumber);
         }
 
-        // Initialize the Fragment
-        StepDetails detailsFragment = (StepDetails) getSupportFragmentManager().findFragmentById(R.id.details_fragment);
-        detailsFragment.setStep(step);
-        detailsFragment.setSpecificSteps(json, recipeNumber);
+
     }
 }

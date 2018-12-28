@@ -38,7 +38,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class StepDetails extends Fragment
-    implements ExoPlayer.EventListener {
+    implements ExoPlayer.EventListener, View.OnClickListener {
 
     TextView stepTitle;
     TextView stepDescription;
@@ -76,6 +76,12 @@ public class StepDetails extends Fragment
     {
         if (savedInstanceState != null) {
             // get something, maybe image ID's
+            json = savedInstanceState.getString(JSON);
+            recipeNumber = savedInstanceState.getInt(INDEX);
+            step = savedInstanceState.getInt(STEP);
+            specificSteps = NetworkingUtils.getSpecificSteps(json, recipeNumber);
+            playbackPosition = savedInstanceState.getLong(PLAYBACK);
+            currentWindow = savedInstanceState.getInt(WINDOW);
         }
 
         View rootView = layoutInflater.inflate(R.layout.step_details, container, false);
@@ -101,64 +107,14 @@ public class StepDetails extends Fragment
             stepTitle = (TextView) rootView.findViewById(R.id.step_title);
             stepDescription = (TextView) rootView.findViewById(R.id.detailedStep);
             nextButton = (Button) rootView.findViewById(R.id.next_step);
+            nextButton.setOnClickListener(this);
             previous = (Button) rootView.findViewById(R.id.previous_step);
+            previous.setOnClickListener(this);
             playerView = (SimpleExoPlayerView) rootView.findViewById(R.id.video_player);
             playerView.setDefaultArtwork(BitmapFactory.decodeResource(getResources(), R.drawable.exo_controls_play));
             getStepDetails();
         }
 
-    }
-
-    public void previousStep(View view) {
-        if (step > 0) {
-            step = step - 1;
-            stepTitle.setText(specificSteps[1][step]);
-            stepDescription.setText(specificSteps[2][step]);
-            if (step == 0)
-                previous.setText(R.string.Ingredients);
-            else if (step == 1)
-                previous.setText(R.string.Introduction);
-
-            releasePlayer();
-            playbackPosition = 0;
-            currentWindow = 0;
-            initializePlayer(specificSteps[3][step]);
-        }
-        else {
-            Intent intent = new Intent(context, IngredientsActivity.class);
-            Bundle selected = new Bundle();
-            selected.putString(JSON, json);
-            selected.putInt(INDEX, recipeNumber);
-            selected.putInt(StepDetails.STEP, step);
-            intent.putExtras(selected);
-            startActivity(intent);
-        }
-
-        if (step < NetworkingUtils.getNumberOfSteps(json, recipeNumber) - 1)
-            nextButton.setVisibility(View.VISIBLE);
-    }
-
-    public void nextStep(View view) {
-        if (step < NetworkingUtils.getNumberOfSteps(json, recipeNumber) - 1) {
-            step = step + 1;
-            if (step < NetworkingUtils.getNumberOfSteps(json, recipeNumber) - 1) {
-                nextButton.setVisibility(View.VISIBLE);
-            } else {
-                nextButton.setVisibility(View.INVISIBLE);
-            }
-            stepTitle.setText(specificSteps[1][step]);
-            stepDescription.setText(specificSteps[2][step]);
-
-            releasePlayer();
-            playbackPosition = 0;
-            currentWindow = 0;
-            initializePlayer(specificSteps[3][step]);
-        }
-
-        if (step > 1)
-            previous.setText(R.string.previous_step);
-        else if (step == 1)
-            previous.setText(R.string.Introduction);
     }
 
     private void initializePlayer(String mediaUriString)
@@ -221,6 +177,8 @@ public class StepDetails extends Fragment
         playbackPosition = player.getCurrentPosition();
         currentWindow = player.getCurrentWindowIndex();
         savedInstanceState.putInt(STEP, step);
+        savedInstanceState.putString(JSON, json);
+        savedInstanceState.putInt(INDEX, recipeNumber);
         savedInstanceState.putLong(PLAYBACK, playbackPosition);
         savedInstanceState.putInt(WINDOW, currentWindow);
         super.onSaveInstanceState(savedInstanceState);
@@ -241,7 +199,6 @@ public class StepDetails extends Fragment
 
     }
     // TODO stopping point 12/24  This method works, research playbackStates and then the next objective
-    // Merry Christmas!
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
         if (playbackState == ExoPlayer.STATE_READY && playWhenReady) {
@@ -263,8 +220,10 @@ public class StepDetails extends Fragment
     }
 
     // setter methods to set the values in the fragment
-    public void setSpecificSteps(String json, int recipeNumber)
+    public void setSpecificSteps(String jsonText, int selectedRecipe)
     {
+        json = jsonText;
+        recipeNumber = selectedRecipe;
         specificSteps = NetworkingUtils.getSpecificSteps(json, recipeNumber);
     }
 
@@ -293,5 +252,61 @@ public class StepDetails extends Fragment
             previous.setText(R.string.previous_step);
 
         initializePlayer(specificSteps[3][step]);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.previous_step:
+                if (step > 0) {
+                    step = step - 1;
+                    stepTitle.setText(specificSteps[1][step]);
+                    stepDescription.setText(specificSteps[2][step]);
+                    if (step == 0)
+                        previous.setText(R.string.Ingredients);
+                    else if (step == 1)
+                        previous.setText(R.string.Introduction);
+
+                    releasePlayer();
+                    playbackPosition = 0;
+                    currentWindow = 0;
+                    initializePlayer(specificSteps[3][step]);
+                }
+                else {
+                    Intent intent = new Intent(context, IngredientsActivity.class);
+                    Bundle selected = new Bundle();
+                    selected.putString(JSON, json);
+                    selected.putInt(INDEX, recipeNumber);
+                    selected.putInt(StepDetails.STEP, step);
+                    intent.putExtras(selected);
+                    startActivity(intent);
+                }
+
+                if (step < NetworkingUtils.getNumberOfSteps(json, recipeNumber) - 1)
+                    nextButton.setVisibility(View.VISIBLE);
+                break;
+            case R.id.next_step:
+                if (step < NetworkingUtils.getNumberOfSteps(json, recipeNumber) - 1) {
+                    step = step + 1;
+                    if (step < NetworkingUtils.getNumberOfSteps(json, recipeNumber) - 1) {
+                        nextButton.setVisibility(View.VISIBLE);
+                    } else {
+                        nextButton.setVisibility(View.INVISIBLE);
+                    }
+                    stepTitle.setText(specificSteps[1][step]);
+                    stepDescription.setText(specificSteps[2][step]);
+
+                    releasePlayer();
+                    playbackPosition = 0;
+                    currentWindow = 0;
+                    initializePlayer(specificSteps[3][step]);
+                }
+
+                if (step > 1)
+                    previous.setText(R.string.previous_step);
+                else if (step == 1)
+                    previous.setText(R.string.Introduction);
+                break;
+        }
     }
 }
