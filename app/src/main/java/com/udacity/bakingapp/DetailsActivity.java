@@ -55,9 +55,11 @@ public class DetailsActivity extends AppCompatActivity {
         } else {
             step = start.getExtras().getInt(STEP);
             // Initialize the Fragment
-            StepDetails detailsFragment = (StepDetails) getSupportFragmentManager().findFragmentById(R.id.details_fragment);
+            StepDetails detailsFragment = new StepDetails();
+            FragmentManager fragmentManager = getSupportFragmentManager();
             detailsFragment.setStep(step);
             detailsFragment.setSpecificSteps(json, recipeNumber);
+            fragmentManager.beginTransaction().add(R.id.details_fragment, detailsFragment).commit();
         }
 
 

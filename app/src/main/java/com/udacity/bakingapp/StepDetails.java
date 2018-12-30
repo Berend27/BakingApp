@@ -198,7 +198,7 @@ public class StepDetails extends Fragment
     public void onLoadingChanged(boolean isLoading) {
 
     }
-    // TODO stopping point 12/24  This method works, research playbackStates and then the next objective
+
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
         if (playbackState == ExoPlayer.STATE_READY && playWhenReady) {
@@ -273,6 +273,8 @@ public class StepDetails extends Fragment
                     initializePlayer(specificSteps[3][step]);
                 }
                 else {
+                    player.stop();
+                    player.release();
                     Intent intent = new Intent(context, IngredientsActivity.class);
                     Bundle selected = new Bundle();
                     selected.putString(JSON, json);

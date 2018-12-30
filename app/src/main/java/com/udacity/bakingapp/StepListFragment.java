@@ -1,9 +1,11 @@
 package com.udacity.bakingapp;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class StepListFragment extends Fragment {
+public class StepListFragment extends ListFragment {
 
     public static final String STEPS_KEY = "steps";
     public static final String TITLE = "title";
@@ -26,18 +28,37 @@ public class StepListFragment extends Fragment {
 
     protected Context context;
 
+    static interface Listener {
+        void itemClicked(int position);
+    }
+
+    private Listener listener;
+
     public StepListFragment() {}
+
+    Bundle savedState;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
+        View rootView = inflater.inflate(R.layout.step_list_fragment, container, false);
         if (savedInstanceState != null)
         {
-            // get stuff
+            steps = savedInstanceState.getStringArray(STEPS_KEY);
+            title = savedInstanceState.getString(TITLE);
+            index = savedInstanceState.getInt(INDEX);
+            json = savedInstanceState.getString(JSON);
+            savedState = savedInstanceState;
         }
 
-        View rootView = inflater.inflate(R.layout.step_list_fragment, container, false);
         return rootView;
+    }
+
+    @Override
+    public void onAttach(Context context)
+    {
+        super.onAttach(context);
+        this.listener = (Listener) context;
     }
 
     @Override
@@ -51,7 +72,7 @@ public class StepListFragment extends Fragment {
     public void onStart()
     {
         super.onStart();
-
+        if (savedState != null) setUpListFragment(json, index, title, steps);
     }
 
     protected void setUpListFragment(String json, int recipeNumber, String title, String[] steps)
@@ -60,10 +81,9 @@ public class StepListFragment extends Fragment {
         index = recipeNumber;
         this.title = title;
         this.steps = steps;
-        final String FINAL_JSON = json;
+
 
         View rootView = getView();
-
         TextView titleTextView = (TextView) rootView.findViewById(R.id.recipe_name);
         if (title.contains("Pie"))
             titleTextView.setBackgroundColor(getResources().getColor(R.color.pie));
@@ -80,31 +100,28 @@ public class StepListFragment extends Fragment {
         }
         titleTextView.setText(title);
 
-
         ArrayAdapter<String> listAdapter = new ArrayAdapter<>(context, R.layout.step_list_item,
                 R.id.list_item, steps);
-        ListView stepList = (ListView) rootView.findViewById(R.id.steps_list);
-        stepList.setAdapter(listAdapter);
+        setListAdapter(listAdapter);
 
-        // Creating the Click Listener
-        AdapterView.OnItemClickListener clickListener = new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View itemView, int position, long id) {
-                Intent detailedIntent;
-                if (position == 0)    // if "Ingredients" is selected
-                    detailedIntent = new Intent(context, IngredientsActivity.class);
-                else {
-                    detailedIntent = new Intent(context, DetailsActivity.class);
-                    position = position - 1;    // since "Ingredients" takes up position 0
-                }
-                Bundle selected = new Bundle();
-                selected.putString(JSON, FINAL_JSON);
-                selected.putInt(INDEX, index);
-                selected.putInt(StepDetails.STEP, position);
-                detailedIntent.putExtras(selected);
-                startActivity(detailedIntent);
-            }
-        };
-        stepList.setOnItemClickListener(clickListener);
+    }
+
+    @Override
+    public void onListItemClick(ListView listView, View itemView, int position, long id) {
+
+        if (listener != null) {
+            listener.itemClicked(position);
+        }
+
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState)
+    {
+        savedInstanceState.putString(TITLE, title);
+        savedInstanceState.putString(JSON, json);
+        savedInstanceState.putInt(INDEX, index);
+        savedInstanceState.putStringArray(STEPS_KEY, steps);
+        super.onSaveInstanceState(savedInstanceState);
     }
 }
