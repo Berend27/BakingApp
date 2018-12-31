@@ -66,9 +66,15 @@ public class StepDetails extends Fragment
 
     protected Context context;
 
+    static interface PreviousOrNextListener {
+        void ingredientsClicked();
+    }
+
+    private PreviousOrNextListener listener;
+
     public StepDetails()
     {
-        // empty constructor so far
+        // empty constructor
     }
 
     @Override
@@ -112,6 +118,7 @@ public class StepDetails extends Fragment
             previous.setOnClickListener(this);
             playerView = (SimpleExoPlayerView) rootView.findViewById(R.id.video_player);
             playerView.setDefaultArtwork(BitmapFactory.decodeResource(getResources(), R.drawable.exo_controls_play));
+            releasePlayer();
             getStepDetails();
         }
 
@@ -162,7 +169,7 @@ public class StepDetails extends Fragment
         super.onDestroy();
     }
 
-    private void releasePlayer()
+    void releasePlayer()
     {
         if (player != null) {
             player.stop();
@@ -254,6 +261,7 @@ public class StepDetails extends Fragment
         initializePlayer(specificSteps[3][step]);
     }
 
+    // onClick for the two buttons at the bottom of the fragment (previous and next)
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -275,13 +283,7 @@ public class StepDetails extends Fragment
                 else {
                     player.stop();
                     player.release();
-                    Intent intent = new Intent(context, IngredientsActivity.class);
-                    Bundle selected = new Bundle();
-                    selected.putString(JSON, json);
-                    selected.putInt(INDEX, recipeNumber);
-                    selected.putInt(StepDetails.STEP, step);
-                    intent.putExtras(selected);
-                    startActivity(intent);
+                    listener.ingredientsClicked();
                 }
 
                 if (step < NetworkingUtils.getNumberOfSteps(json, recipeNumber) - 1)
@@ -311,4 +313,16 @@ public class StepDetails extends Fragment
                 break;
         }
     }
+
+    @Override
+    public void onAttach(Context context)
+    {
+        super.onAttach(context);
+        try {
+            listener = (PreviousOrNextListener) context;
+        } catch (ClassCastException ce) {
+            Log.i("DetailsActivity", ce.getMessage());
+        }
+    }
+
 }

@@ -9,7 +9,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
-public class IngredientsActivity extends AppCompatActivity {
+public class IngredientsActivity extends AppCompatActivity
+        implements IngredientsFragment.ViewIntroListener{
 
     private String json;
     private int recipeNumber;
@@ -31,4 +32,14 @@ public class IngredientsActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void introButtonClicked() {
+        Bundle selected = new Bundle();
+        selected.putString(StepDetails.JSON, json);
+        selected.putInt(StepDetails.INDEX, recipeNumber);
+        selected.putInt(StepDetails.STEP, 0);
+        Intent detailedIntent = new Intent(this, DetailsActivity.class);
+        detailedIntent.putExtras(selected);
+        startActivity(detailedIntent);
+    }
 }

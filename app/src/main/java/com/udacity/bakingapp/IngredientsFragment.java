@@ -4,21 +4,28 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-
+// TODO stopping point 12/31 Make a widget
 public class IngredientsFragment extends Fragment {
 
     private String json;
     private int recipeNumber;
 
-    public IngredientsFragment() {}
-
     Context context;
+
+    static interface ViewIntroListener {
+        void introButtonClicked();
+    }
+
+    private ViewIntroListener listener;
+
+    public IngredientsFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -39,20 +46,15 @@ public class IngredientsFragment extends Fragment {
         View rootView = getView();
         super.onStart();
 
-        // TODO stopping point 12/30 fix this button to work with a fragment on a tablet
         Button viewIntro = (Button) rootView.findViewById(R.id.view_intro);
         viewIntro.setVisibility(View.VISIBLE);
         viewIntro.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Bundle bundle = new Bundle();
-                bundle.putInt(StepDetails.INDEX, recipeNumber);
-                bundle.putString(StepDetails.JSON, json);
-                bundle.putInt(StepDetails.STEP, 0);
+                if (listener != null) {
+                    listener.introButtonClicked();
+                }
 
-                Intent intent = new Intent(context, DetailsActivity.class);
-                intent.putExtras(bundle);
-                startActivity(intent);
             }
         });
 
@@ -75,5 +77,16 @@ public class IngredientsFragment extends Fragment {
     {
         savedInstanceState.putString(StepListActivity.JSON, json);
         savedInstanceState.putInt(StepListActivity.INDEX, recipeNumber);
+    }
+
+    @Override
+    public void onAttach(Context context)
+    {
+        super.onAttach(context);
+        try {
+            this.listener = (ViewIntroListener) context;
+        } catch (ClassCastException ce) {
+            Log.d("IngredientsFragment", ce.getMessage());
+        }
     }
 }

@@ -14,7 +14,8 @@ import static com.udacity.bakingapp.StepDetails.INDEX;
 import static com.udacity.bakingapp.StepDetails.JSON;
 
 
-public class DetailsActivity extends AppCompatActivity {
+public class DetailsActivity extends AppCompatActivity
+        implements StepDetails.PreviousOrNextListener {
 
     private String[][] specificSteps;
 
@@ -63,5 +64,16 @@ public class DetailsActivity extends AppCompatActivity {
         }
 
 
+    }
+
+    @Override
+    public void ingredientsClicked() {
+        Intent intent = new Intent(this, IngredientsActivity.class);
+        Bundle selected = new Bundle();
+        selected.putString(JSON, json);
+        selected.putInt(INDEX, recipeNumber);
+        selected.putInt(StepDetails.STEP, step);
+        intent.putExtras(selected);
+        startActivity(intent);
     }
 }
