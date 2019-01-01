@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-// TODO stopping point 12/31 Make a widget
+
 public class IngredientsFragment extends Fragment {
 
     private String json;

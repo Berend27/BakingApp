@@ -2,12 +2,17 @@ package com.udacity.bakingapp;
 
 import android.content.Intent;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class IngredientsActivity extends AppCompatActivity
         implements IngredientsFragment.ViewIntroListener{
@@ -15,10 +20,17 @@ public class IngredientsActivity extends AppCompatActivity
     private String json;
     private int recipeNumber;
 
+    @BindView(R.id.ingredients_list_toolbar) Toolbar toolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ingredients);
+        ButterKnife.bind(this);
+
+        setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
 
         Intent ingredientsIntent = getIntent();
         json = ingredientsIntent.getExtras().getString(StepListActivity.JSON);

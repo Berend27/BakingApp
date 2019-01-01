@@ -7,4 +7,6 @@
     <string name="Introduction">Introduction</string>
     <string name="app_title">Dexter\'s Baking App</string>
     <string name="recipes">Recipes</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 </resources>

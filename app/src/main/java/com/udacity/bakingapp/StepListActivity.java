@@ -1,17 +1,24 @@
 package com.udacity.bakingapp;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.os.AsyncTask;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.support.v7.widget.Toolbar;
+import android.widget.Toast;
+
+import com.udacity.bakingapp.Database.RecipeProvider;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -49,6 +56,8 @@ public class StepListActivity extends AppCompatActivity
 
     private boolean tablet;
     private boolean detailsDisplayed;
+
+    private TestDatabase task = new TestDatabase();
 
     // @BindView(R.id.step_list_toolbar) Toolbar toolbar;
 
@@ -114,6 +123,8 @@ public class StepListActivity extends AppCompatActivity
         }
 
 
+
+        task.execute();
 
     }
 
@@ -198,6 +209,29 @@ public class StepListActivity extends AppCompatActivity
             ingredientsFragment.setVariables(json, recipeNumber);
             fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction().replace(R.id.details_or_ingredients_fragment, ingredientsFragment).commit();
+        }
+    }
+
+    // TODO stopping point 1/1 The Content Provider is operational, operations need to be customized for this app
+    public class TestDatabase extends AsyncTask<Void, Void, Cursor>
+    {
+
+        @Override
+        protected Cursor doInBackground(Void... voids) {
+            ContentResolver resolver = getContentResolver();
+            Cursor cursor = resolver.query(RecipeProvider.Lists.LISTS, null, null, null, null);
+            return cursor;
+        }
+
+        @Override
+        protected void onPostExecute(Cursor cursor)
+        {
+            super.onPostExecute(cursor);
+            cursor.moveToPosition(0);
+            Log.i("onPostExecute:", "cursor moved");
+            String ingredientsString = cursor.getString(2);
+            Log.i("ingredients string", "   $ $ $" + ingredientsString);
+            Toast.makeText(context, ingredientsString, Toast.LENGTH_LONG).show();
         }
     }
 }

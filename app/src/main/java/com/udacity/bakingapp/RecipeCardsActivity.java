@@ -1,5 +1,7 @@
 package com.udacity.bakingapp;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
@@ -9,7 +11,18 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.udacity.bakingapp.Database.ListColumns;
+import com.udacity.bakingapp.Database.RecipeProvider;
+
+import net.simonvt.schematic.annotation.AutoIncrement;
+import net.simonvt.schematic.annotation.DataType;
+import net.simonvt.schematic.annotation.NotNull;
+import net.simonvt.schematic.annotation.PrimaryKey;
+
 import java.util.Arrays;
+
+import static net.simonvt.schematic.annotation.DataType.Type.INTEGER;
+import static net.simonvt.schematic.annotation.DataType.Type.TEXT;
 
 public class RecipeCardsActivity extends AppCompatActivity
     implements RecipeCardAdapter.RecipeCardClickListener {
@@ -85,6 +98,31 @@ public class RecipeCardsActivity extends AppCompatActivity
                 recipesAdapter.setJson(jsonString);
                 recipesAdapter.setRecipes();
                 recipeCards.setAdapter(recipesAdapter);
+
+                // adding to the database
+                String[] recipes = NetworkingUtils.getRecipeNames(jsonString);
+                ContentValues contentValues = new ContentValues();
+                for (int i = 0; i < numberOfRecipes; i++) {
+                    contentValues.put(ListColumns._ID, i);
+                    contentValues.put(ListColumns.TITLE, recipes[i]);
+                    String ingredients = "";
+                    String[] array;
+                    array = NetworkingUtils.getIngredients(jsonString, i);
+                    try {
+                        for (int j = 0; j < array.length; j++) {
+                            ingredients = ingredients + array[j] + "&";
+                        }
+                    } catch (Exception e) {}
+                    contentValues.put(ListColumns.INGREDIENTS, ingredients);
+
+                    try {
+                        getContentResolver().insert(RecipeProvider.Lists.LISTS, contentValues);
+                    } catch (Exception e)
+                    {
+                        Log.i(TAG, "Duplicate values?");
+                    }
+                }
+
             }
         }
     }
