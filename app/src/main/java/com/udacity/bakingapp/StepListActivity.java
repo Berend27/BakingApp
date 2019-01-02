@@ -212,7 +212,7 @@ public class StepListActivity extends AppCompatActivity
         }
     }
 
-    // TODO stopping point 1/1 The Content Provider is operational, operations need to be customized for this app
+
     public class TestDatabase extends AsyncTask<Void, Void, Cursor>
     {
 

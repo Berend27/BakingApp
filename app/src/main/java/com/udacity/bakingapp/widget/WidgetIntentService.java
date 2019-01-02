@@ -1,12 +1,18 @@
 package com.udacity.bakingapp.widget;
 
 import android.app.IntentService;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
+import android.widget.Toast;
 
+import com.udacity.bakingapp.Database.ListColumns;
 import com.udacity.bakingapp.Database.RecipeProvider;
+import com.udacity.bakingapp.R;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -25,6 +31,8 @@ public class WidgetIntentService extends IntentService {
     // TODO: Rename parameters
     private static final String EXTRA_PARAM1 = "com.udacity.bakingapp.widget.extra.PARAM1";
     private static final String EXTRA_PARAM2 = "com.udacity.bakingapp.widget.extra.PARAM2";
+
+    public static String ingredients;
 
     public WidgetIntentService() {
         super("WidgetIntentService");
@@ -81,13 +89,23 @@ public class WidgetIntentService extends IntentService {
     {
         ContentResolver resolver = getContentResolver();
         Cursor cursor = resolver.query(RecipeProvider.Lists.LISTS, null, null,
-                null, null);
+                null, ListColumns._ID + " ASC");
 
         // Extract the Ingredients using Cursor methods
         // use cursor.close(); when done with the cursor
+        cursor.moveToPosition(0);
+        Log.i("onPostExecute:", "cursor moved");
+        String ingredientsString = cursor.getString(2);
+        Log.i("ingredients string", "   $ $ $" + ingredientsString);
+        ingredients = ingredientsString;
+       // Toast.makeText(this, ingredientsString, Toast.LENGTH_LONG).show();
+        cursor.close();
 
         // call the defined provider method to update the widget
-
+        AppWidgetManager manager = AppWidgetManager.getInstance(this);
+        int[] ids = manager.getAppWidgetIds(new ComponentName(this, BakingAppWidget.class));
+        manager.notifyAppWidgetViewDataChanged(ids, R.id.widget_list_view);
+        BakingAppWidget.updateIngredientsWidget(this, manager, ids, ingredientsString);
         // query that data here in this method
     }
     /**
@@ -106,5 +124,9 @@ public class WidgetIntentService extends IntentService {
     private void handleActionBaz(String param1, String param2) {
         // TODO: Handle action Baz
         throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    public static String getIngredients() {
+        return ingredients;
     }
 }
