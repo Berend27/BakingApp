@@ -5,9 +5,13 @@ import android.widget.RemoteViewsService;
 
 public class ListWidgetService extends RemoteViewsService {
 
+    // only gets called once
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
-        return new IngredientsViewsFactory(this.getApplicationContext());
+        int cursorPlace = intent.getIntExtra(BakingAppWidget.POSITION, 0);
+        intent.removeExtra(BakingAppWidget.POSITION);
+        IngredientsViewsFactory viewsFactory
+                =  new IngredientsViewsFactory(this.getApplicationContext(), cursorPlace);
+        return viewsFactory;
     }
 }
-// TODO Stopping point 6:53

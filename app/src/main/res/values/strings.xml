@@ -9,4 +9,5 @@
     <string name="recipes">Recipes</string>
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
+    <string name="switch_recipes"> Switch \nRecipes</string>
 </resources>

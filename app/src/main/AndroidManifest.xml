@@ -15,6 +15,9 @@
         <service android:name=".widget.ListWidgetService"
             android:permission="android.permission.BIND_REMOTEVIEWS"/>
 
+        <service android:name=".widget.RecipeViewsService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"/>
+
         <provider
             android:authorities="com.udacity.bakingapp.Database.RecipeProvider"
             android:name=".Database.generated.RecipeProvider"

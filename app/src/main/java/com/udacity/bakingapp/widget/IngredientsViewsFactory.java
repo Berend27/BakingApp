@@ -1,6 +1,7 @@
 package com.udacity.bakingapp.widget;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -15,13 +16,15 @@ public class IngredientsViewsFactory implements RemoteViewsService.RemoteViewsFa
     // Declare a Context and a Cursor
     Context context;
     Cursor cursor;
-    int cursorPlace;
+    protected static int cursorPlace;
     int itemCount;
 
-    public IngredientsViewsFactory(Context appContext)
+    private final String TAG = IngredientsViewsFactory.class.getSimpleName();
+
+    public IngredientsViewsFactory(Context appContext, int cursorPosition)
     {
         context = appContext;
-        cursorPlace = 0;
+        cursorPlace = cursorPosition;
         itemCount = 4;
     }
 
@@ -35,7 +38,8 @@ public class IngredientsViewsFactory implements RemoteViewsService.RemoteViewsFa
         if (cursor != null) cursor.close();
         cursor = context.getContentResolver().query(
                 RecipeProvider.Lists.LISTS,
-                null, null, null, ListColumns._ID + " ASC");
+                null, null, null, ListColumns.TITLE + " ASC");
+
     }
 
     @Override
@@ -62,12 +66,10 @@ public class IngredientsViewsFactory implements RemoteViewsService.RemoteViewsFa
         int idIndex = cursor.getColumnIndex(ListColumns._ID);
         int nameIndex = cursor.getColumnIndex(ListColumns.TITLE);
         int ingredientsIndex = cursor.getColumnIndex(ListColumns.INGREDIENTS);
-        Log.i("onPostExecute:", "cursor moved");
+        Log.i(TAG, "cursor moved to " + String.valueOf(cursorPlace));
         String ingredientsString = cursor.getString(ingredientsIndex);
-        Log.i("ingredients string", "   $ $ $" + ingredientsString);
+        Log.i(TAG, "   $ $ $" + ingredientsString);
         String[] ingredients = ingredientsString.split("&");
-        itemCount = ingredients.length;
-        getCount();
 
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.ingredients_item);
         views.setTextViewText(R.id.list_item, ingredients[position]);
@@ -96,7 +98,4 @@ public class IngredientsViewsFactory implements RemoteViewsService.RemoteViewsFa
         return false;
     }
 
-    public void setCursorPlace(int place){
-        this.cursorPlace = place;
-    }
 }
