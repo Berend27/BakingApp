@@ -14,8 +14,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -44,6 +46,7 @@ public class StepDetails extends Fragment
     TextView stepDescription;
     Button nextButton;
     Button previous;
+    ImageView stepPicture;
 
     public static final String JSON = "json";
     public static final String INDEX = "index";
@@ -118,6 +121,8 @@ public class StepDetails extends Fragment
             previous.setOnClickListener(this);
             playerView = (SimpleExoPlayerView) rootView.findViewById(R.id.video_player);
             playerView.setDefaultArtwork(BitmapFactory.decodeResource(getResources(), R.drawable.exo_controls_play));
+            stepPicture = (ImageView) rootView.findViewById(R.id.step_picture);
+            Glide.with(this).clear(stepPicture);
             releasePlayer();
             getStepDetails();
         }
@@ -259,6 +264,8 @@ public class StepDetails extends Fragment
             previous.setText(R.string.previous_step);
 
         initializePlayer(specificSteps[3][step]);
+        playerView.setVisibility(View.VISIBLE);
+        handlePicture();
     }
 
     // onClick for the two buttons at the bottom of the fragment (previous and next)
@@ -288,6 +295,8 @@ public class StepDetails extends Fragment
 
                 if (step < NetworkingUtils.getNumberOfSteps(json, recipeNumber) - 1)
                     nextButton.setVisibility(View.VISIBLE);
+
+                handlePicture();
                 break;
             case R.id.next_step:
                 if (step < NetworkingUtils.getNumberOfSteps(json, recipeNumber) - 1) {
@@ -310,6 +319,8 @@ public class StepDetails extends Fragment
                     previous.setText(R.string.previous_step);
                 else if (step == 1)
                     previous.setText(R.string.Introduction);
+
+                handlePicture();
                 break;
         }
     }
@@ -322,6 +333,24 @@ public class StepDetails extends Fragment
             listener = (PreviousOrNextListener) context;
         } catch (ClassCastException ce) {
             Log.i("DetailsActivity", ce.getMessage());
+        }
+    }
+
+    private void handlePicture()
+    {
+        if (specificSteps[3][step].isEmpty() && !specificSteps[4][step].isEmpty())
+        {
+            String pictureUrl = specificSteps[4][step];
+            Glide.with(this).load(pictureUrl).into(stepPicture);
+            stepPicture.setVisibility(View.VISIBLE);
+            playerView.setVisibility(View.GONE);
+
+        } else {
+            stepPicture.setVisibility(View.GONE);
+            playerView.setVisibility(View.VISIBLE);
+            if (specificSteps[3][step].isEmpty()) {
+                playerView.setVisibility(View.GONE);
+            }
         }
     }
 

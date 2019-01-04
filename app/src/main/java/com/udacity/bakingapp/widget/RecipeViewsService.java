@@ -20,7 +20,7 @@ public class RecipeViewsService extends RemoteViewsService {
     }
 }
 
-class RecipeViewsFactory implements RemoteViewsService.RemoteViewsFactory, AdapterView.OnItemClickListener {
+class RecipeViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
     // Declare a Context and a Cursor
     Context context;
@@ -70,6 +70,7 @@ class RecipeViewsFactory implements RemoteViewsService.RemoteViewsFactory, Adapt
         // Bundle for the intent that holds the position of the item that was clicked
         Bundle extras = new Bundle();
         extras.putInt(BakingAppWidget.POSITION, position);
+        extras.putString(BakingAppWidget.TITLE, title);
         Intent fillInIntent = new Intent();
         fillInIntent.putExtras(extras);
         views.setOnClickFillInIntent(R.id.list_item, fillInIntent);
@@ -97,8 +98,4 @@ class RecipeViewsFactory implements RemoteViewsService.RemoteViewsFactory, Adapt
         return false;
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-    }
 }

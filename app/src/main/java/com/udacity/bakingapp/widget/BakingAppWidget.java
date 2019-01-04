@@ -28,6 +28,7 @@ public class BakingAppWidget extends AppWidgetProvider {
 
     public static final String SELECTED_RECIPE = "com.udacity.bakingapp.widget.action.SELECTED_RECIPE";
     public static final String POSITION = "position";
+    public static final String TITLE = "title";
 
     private static final String TAG = BakingAppWidget.class.getSimpleName();
 
@@ -97,9 +98,10 @@ public class BakingAppWidget extends AppWidgetProvider {
                     AppWidgetManager.INVALID_APPWIDGET_ID);
             recipeNumber = intent.getIntExtra(POSITION, 0);
             selectionMade = true;
+            String title = intent.getStringExtra(TITLE);
             updateAppWidget(context, mgr, widgetId );
 
-            Toast.makeText(context, "Touched view " + recipeNumber, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, title, Toast.LENGTH_LONG).show();
         }
         super.onReceive(context, intent);
     }
@@ -135,7 +137,7 @@ public class BakingAppWidget extends AppWidgetProvider {
 
         return views;
     }
-    // TODO stopping point 1/3 The widget's ListView works.
+
     private static RemoteViews getRecipesRemoteView(Context context)
     {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.recipe_selection_widget);

@@ -8,6 +8,7 @@ import net.simonvt.schematic.annotation.PrimaryKey;
 import static net.simonvt.schematic.annotation.DataType.Type.INTEGER;
 import static net.simonvt.schematic.annotation.DataType.Type.TEXT;
 
+// Setting up the database table with the library Schematic
 public interface ListColumns {
     @DataType(INTEGER) @PrimaryKey
     @AutoIncrement
@@ -18,4 +19,7 @@ public interface ListColumns {
 
     @DataType(TEXT) @NotNull
     String INGREDIENTS = "ingredients";
+
+    @DataType(TEXT) @NotNull
+    String JSON = "json";
 }

@@ -3,6 +3,7 @@ package com.udacity.bakingapp;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -30,11 +31,13 @@ public class RecipeCardsActivity extends AppCompatActivity
     private RecipeCardAdapter recipesAdapter;
     private RecyclerView recipeCards;
     private FetchRecipes fetch = new FetchRecipes();
+    private BackupJson backupTask = new BackupJson();
     private int numberOfRecipes = 4;
 
     static final String QUERY = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
 
     private String jsonFromQuery = "";
+    private String jsonFromDatabase = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +49,9 @@ public class RecipeCardsActivity extends AppCompatActivity
         recipeCards.setLayoutManager(layoutManager);
         recipeCards.setHasFixedSize(true);
 
-        recipesAdapter = new RecipeCardAdapter(numberOfRecipes, this);
+        try {
+            recipesAdapter = new RecipeCardAdapter(numberOfRecipes, this);
+        } catch (Exception e) {}
         // the adapter is set in onPostExecute of the AsyncTask
         fetch.execute(QUERY);
 
@@ -54,7 +59,6 @@ public class RecipeCardsActivity extends AppCompatActivity
 
     @Override
     public void onListItemClicked(int clickedItemIndex) {
-        Toast.makeText(this, String.valueOf(clickedItemIndex), Toast.LENGTH_SHORT).show();
         Log.i("Item number selected:", String.valueOf(clickedItemIndex));
         String[] justTheSteps = NetworkingUtils.getSteps(jsonFromQuery, clickedItemIndex);
         if (justTheSteps.length > 0) {
@@ -83,10 +87,12 @@ public class RecipeCardsActivity extends AppCompatActivity
             if (strings.length == 0) return null;
             // publishProgress(1);
             try {
-                return NetworkingUtils.run(strings[0]);
+                String json = NetworkingUtils.run(strings[0]);
+                return json;
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.e(TAG, e.toString());
+                Log.i(TAG, "The query returned null");
                 return null;
             }
         }
@@ -95,34 +101,78 @@ public class RecipeCardsActivity extends AppCompatActivity
         protected void onPostExecute(String jsonString) {
             if (jsonString != null) {
                 jsonFromQuery = jsonString;
-                recipesAdapter.setJson(jsonString);
-                recipesAdapter.setRecipes();
-                recipeCards.setAdapter(recipesAdapter);
 
                 // adding to the database
-                String[] recipes = NetworkingUtils.getRecipeNames(jsonString);
-                ContentValues contentValues = new ContentValues();
-                for (int i = 0; i < numberOfRecipes; i++) {
-                    contentValues.put(ListColumns._ID, i);
-                    contentValues.put(ListColumns.TITLE, recipes[i]);
-                    String ingredients = "";
-                    String[] array;
-                    array = NetworkingUtils.getIngredients(jsonString, i);
-                    try {
-                        for (int j = 0; j < array.length; j++) {
-                            ingredients = ingredients + array[j] + "&";
-                        }
-                    } catch (Exception e) {}
-                    contentValues.put(ListColumns.INGREDIENTS, ingredients);
+                if (!jsonFromQuery.isEmpty() && jsonFromQuery != null) {
+                    recipesAdapter.setJson(jsonString);
+                    recipesAdapter.setRecipes();
+                    recipeCards.setAdapter(recipesAdapter);
 
-                    try {
-                        getContentResolver().insert(RecipeProvider.Lists.LISTS, contentValues);
-                    } catch (Exception e)
-                    {
-                        Log.i(TAG, "Duplicate values?");
+                    String[] recipes = NetworkingUtils.getRecipeNames(jsonString);
+                    ContentValues contentValues = new ContentValues();
+                    for (int i = 0; i < numberOfRecipes; i++) {
+                        contentValues.put(ListColumns._ID, i);
+                        contentValues.put(ListColumns.TITLE, recipes[i]);
+                        Log.i("Title:", recipes[i]);
+                        contentValues.put(ListColumns.JSON, jsonString);  // offline backup
+                        String ingredients = "";
+                        String[] array;
+                        array = NetworkingUtils.getIngredients(jsonString, i);
+                        // setting up a string that will be split on "&"
+                        try {
+                            for (int j = 0; j < array.length; j++) {
+                                ingredients = ingredients + array[j] + "&";
+                            }
+                        } catch (Exception e) {}
+                        contentValues.put(ListColumns.INGREDIENTS, ingredients);
+
+                        try {
+                            getContentResolver().insert(RecipeProvider.Lists.LISTS, contentValues);
+                        } catch (Exception e)
+                        {
+                            Log.i(TAG, "Duplicate values?");
+                        }
                     }
                 }
+                } else {
+                Log.i(TAG, "No online access to the JSON");
+                backupTask.execute();
 
+            }
+        }
+    }
+
+    public class BackupJson extends AsyncTask<Void, Void, Cursor>
+    {
+
+        @Override
+        protected Cursor doInBackground(Void... voids) {
+            ContentResolver resolver = getContentResolver();
+            Cursor cursor = resolver.query(RecipeProvider.Lists.LISTS, null, null, null, null);
+            return cursor;
+        }
+
+        @Override
+        protected void onPostExecute(Cursor cursor)
+        {
+            Log.i("BackupJson", "Getting JSON from a database");
+            super.onPostExecute(cursor);
+            cursor.moveToFirst();
+            try {
+                jsonFromDatabase = cursor.getString(3);
+            } catch (Exception e) {
+                Log.i("BackupJson", "There was a problem");
+                e.printStackTrace();
+            }
+            cursor.close();
+
+            jsonFromQuery = jsonFromDatabase;
+            if (jsonFromDatabase != null && !jsonFromDatabase.isEmpty()) {
+                try {
+                    recipesAdapter.setJson(jsonFromDatabase);
+                    recipesAdapter.setRecipes();
+                    recipeCards.setAdapter(recipesAdapter);
+                } catch (Exception e) {}
             }
         }
     }

@@ -23,6 +23,7 @@ public class NetworkingUtils {
 
     private NetworkingUtils() {}
 
+    // The library OkHttp is used for making an HTTP request
     static String run(String url) throws IOException {
         Request request = new Request.Builder()
                 .url(url)

@@ -57,8 +57,6 @@ public class StepListActivity extends AppCompatActivity
     private boolean tablet;
     private boolean detailsDisplayed;
 
-    private TestDatabase task = new TestDatabase();
-
     // @BindView(R.id.step_list_toolbar) Toolbar toolbar;
 
     @Override
@@ -122,9 +120,6 @@ public class StepListActivity extends AppCompatActivity
             }
         }
 
-
-
-        task.execute();
 
     }
 
@@ -212,26 +207,4 @@ public class StepListActivity extends AppCompatActivity
         }
     }
 
-
-    public class TestDatabase extends AsyncTask<Void, Void, Cursor>
-    {
-
-        @Override
-        protected Cursor doInBackground(Void... voids) {
-            ContentResolver resolver = getContentResolver();
-            Cursor cursor = resolver.query(RecipeProvider.Lists.LISTS, null, null, null, null);
-            return cursor;
-        }
-
-        @Override
-        protected void onPostExecute(Cursor cursor)
-        {
-            super.onPostExecute(cursor);
-            cursor.moveToPosition(0);
-            Log.i("onPostExecute:", "cursor moved");
-            String ingredientsString = cursor.getString(2);
-            Log.i("ingredients string", "   $ $ $" + ingredientsString);
-            Toast.makeText(context, ingredientsString, Toast.LENGTH_LONG).show();
-        }
-    }
 }

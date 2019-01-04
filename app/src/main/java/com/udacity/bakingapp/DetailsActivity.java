@@ -17,8 +17,6 @@ import static com.udacity.bakingapp.StepDetails.JSON;
 public class DetailsActivity extends AppCompatActivity
         implements StepDetails.PreviousOrNextListener {
 
-    private String[][] specificSteps;
-
     private String json;
     private int recipeNumber;
     private int step;
