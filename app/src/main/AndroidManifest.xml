@@ -15,7 +15,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:name=".TheApplication">
 
         <service android:name=".widget.ListWidgetService"
             android:permission="android.permission.BIND_REMOTEVIEWS"/>

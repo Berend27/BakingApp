@@ -124,4 +124,13 @@ public class StepListFragment extends ListFragment {
         savedInstanceState.putStringArray(STEPS_KEY, steps);
         super.onSaveInstanceState(savedInstanceState);
     }
+
+    // for using LeakCanary with a fragment
+    /*
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        TheApplication.getRefWatcher(getActivity()).watch(this);
+    }
+    */
 }

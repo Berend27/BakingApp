@@ -169,7 +169,14 @@ public class StepDetails extends Fragment
     }
 
     @Override
-    public void onDestroy(){
+    public void onPause(){
+        player.stop();
+        player.release();
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
         releasePlayer();
         super.onDestroy();
     }

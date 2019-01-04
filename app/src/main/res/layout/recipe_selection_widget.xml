@@ -29,6 +29,6 @@
         android:layout_centerVertical="true"
         android:layout_margin="8dp"
         android:background="@color/white"
-        android:contentDescription="@string/appwidget_text" />
+        android:contentDescription="@string/recipes" />
 
 </RelativeLayout>

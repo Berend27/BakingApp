@@ -31,7 +31,7 @@
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
         android:background="@color/white"
-        android:contentDescription="@string/appwidget_text"
+        android:contentDescription="@string/Ingredients"
         android:text="@string/Ingredients"
         android:textColor="@color/darkBlueInk"
         android:textSize="24sp"
@@ -46,6 +46,6 @@
         android:layout_centerVertical="true"
         android:layout_margin="8dp"
         android:background="@color/white"
-        android:contentDescription="@string/appwidget_text" />
+        android:contentDescription="@string/widget_description" />
 
 </RelativeLayout>
